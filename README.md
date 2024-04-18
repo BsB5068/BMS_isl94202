@@ -1,7 +1,7 @@
 # Open-BMS
-ISL94202 read and write via arduino nano.
+LG R9 Battery BMS ISL94202 read and write via arduino nano.
 
-brand new battery dump:
+brand new battery of CameronSino dump:
 
 Cells : 
 3667
