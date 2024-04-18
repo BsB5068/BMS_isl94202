@@ -21,10 +21,13 @@ void setup()
   //False comms to unlock I2c state machine on the ic if we mess up^
   disableEEPROMAccess();
   writeReg(0x85, 0b00010000);//Set current shunt gain
-  Serial.println("Press s to set the default settings to the unit");
   Serial.println("Press r to display one reading");
+  Serial.println("Press g to dump all the REGISTERS");
+  Serial.println("Press s to set the default settings to the unit");
   Serial.println("Press R to continiously display readings");
+  Serial.println("Press p to continiously display IPACK measurements and REGISTERS 0x49-0x4A");
   Serial.println("Created by Ben V. Brown");
+  Serial.println("modded by BsB5068");
 }
 
 bool continiousReadings = false;
@@ -99,7 +102,7 @@ void loop()
       setChargeOverCurrent(24, 500, TIMESCALE_MS);//Set the charge current limit to 24mV == 12A. Averaged over 0.5S
       setDischargeShortCircuit(64, 500, TIMESCALE_US);//Set the short circuit protection to 64mV == 32A over 0.5mS
       setCellBalanceOnOffTime(9, TIMESCALE_S, 1, TIMESCALE_S);//Set balance time to 9S on, and 1S off
-      setCellCountSleepMode(3, 10, 32);//Set the unit to 3S cell count. 10 minutes to enter lower power modes. 32 minutes to enter deep sleep
+      setCellCountSleepMode(6, 10, 32);//Set the unit to 3S cell count. 10 minutes to enter lower power modes. 32 minutes to enter deep sleep
       setCellBalanceDifference(10);//Balance cells until they are withing 10mV maximum error
       setCellBalanceMin(3850);//Start the blanacing when the cells are above 3.85V
       setCellBalanceMax(4300);//Stop balancing if the cells are above 4.3V (Set high to disable this feature).
@@ -108,6 +111,21 @@ void loop()
       Serial.println(F("Please disconnect and reconnect the battery to force an EEPROM reload."));
       delay(10000);
     }
+     else if (c == 'g')
+    {
+    uint8_t i=0;
+    uint8_t r;
+    do {
+    r = readReg(i);
+    Serial.print(i, HEX);
+    Serial.print(':');
+    Serial.println(r, HEX);
+    //delay(100);
+    i = i+1;
+    } while (i <172);
+
+    }
+
   }
   delay(500);
   if (continiousReadings)
@@ -131,6 +149,15 @@ void loop()
     reading *= (1.8);
     reading /= (4095 * 2.89);
     Serial.println(reading);
+
+    uint8_t r3 = readReg(0x49);
+    uint8_t r4 = readReg(0x4A);
+    uint8_t r5 = readReg(0x4B);
+    
+    Serial.println(r1);
+    Serial.println(r2);
+    Serial.println(r3);
+    delay(1000);
 
   }
 }
